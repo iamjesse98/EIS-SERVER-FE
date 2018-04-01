@@ -10,6 +10,13 @@ export default class App extends React.Component {
     this.state = {
       devices: [
         { aid: 0, state: false }
+      ],
+      duration: [
+        {
+          aid: 0,
+          duration: 0,
+          time: new Date().toJSON().substring(10, 19).replace('T', '')
+        }
       ]
     }
     this.socket = io.connect('http://192.168.43.179:8080') // rpi    
@@ -27,6 +34,14 @@ export default class App extends React.Component {
       this.setState({ devices: { [device.aid]: { state: device.state } } })
       // console.log(this.state.devices)
     })
+    socket.on('duration', dur => this.setState({
+      duration: {
+        [dur.aid]: {
+          time: dur.time,
+          duration: dur.duration
+        }
+      }
+    }))
   }
 
   render() {
@@ -36,7 +51,7 @@ export default class App extends React.Component {
       <div className="devices">
         <p className="heading">Devices</p>
         <div className="card-container">
-          <UCard ttl="Bulb" sub="Bulb at hall" sce={Bulb} ate="bulb" desc="bulb status" aid={0} act={_ => {
+          <UCard ttl="Bulb" sub="Bulb at hall" sce={Bulb} ate="bulb" desc={<div>Time - {this.state.duration[0].time}<br />Duration - {this.state.duration[0].duration}</div>} aid={0} act={_ => {
             socket.emit('toggle', { aid: 0, t: !this.state.devices[0].state })
           }} expanded={this.state.devices[0].state}></UCard>
           <UCard ttl="Bulb" sub="Bulb at hall" sce={Bulb} ate="bulb" desc="bulb status"></UCard>
